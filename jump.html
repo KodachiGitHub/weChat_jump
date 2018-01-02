@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <style>
+        body{
+            margin: 0;
+        }
+        .jump{
+            display: block;
+        }
+    </style>
+</head>
+<body>
+<img src="" alt="" class="jump">
+<script>
+    //可调节的参数
+    let ratio       = 4;      //屏幕显示截图的缩放比例，视情况自行调整
+    let coefficient = 1.2;    //按压的时间系数，视情况进行调整
+    let height      = 2560;   //手机屏幕分辨率，高度
+    let width       = 1440;   //手机屏幕分辨率，宽度
+
+    //不要改动这里
+    let status      = 0;
+    let startX      = 0;
+    let endX        = 0;
+    let pressTime   = 0;
+    let jump        = document.querySelector('.jump');
+
+    jump.style.width  = width / ratio + 'px';
+    jump.style.height = height / ratio + 'px';
+    getScreenShoot(-1);
+
+    jump.addEventListener('click',function(e){
+        if(status === 0){
+            startX = e.clientX;
+            status = 1;
+            return;
+        }
+        if(status === 1){
+            endX = e.clientX;
+            pressTime = parseInt(Math.abs(( endX - startX ) * ratio) * coefficient);
+            status = 0;
+            getScreenShoot(pressTime);
+        }
+    },false);
+
+    function getScreenShoot(pressTime){
+        let url = 'http://localhost/?pressTime=' + pressTime;
+        let xhr = new XMLHttpRequest();
+        xhr.open('GET', url, true);
+        xhr.responseType = "blob";
+        xhr.onload = function() {
+            if (this.status === 200) {
+                let blob = this.response;
+                let img = document.querySelector('.jump');
+                img.onload = function(e) {
+                    window.URL.revokeObjectURL(img.src);
+                };
+                img.src = window.URL.createObjectURL(blob);
+            }
+        };
+        xhr.send();
+    }
+</script>
+</body>
+</html>
